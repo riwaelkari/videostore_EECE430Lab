@@ -1,0 +1,39 @@
+{% extends 'inventory/base.html' %}
+{% block title %}All Videos{% endblock %}
+
+{% block content %}
+<h2>All Videos</h2>
+<table style="width:100%; border-collapse: collapse; margin-top: 15px;">
+    <tr style="background-color:#333;">
+        <th style="padding:10px; text-align:left;">Title</th>
+        <th>Actor 1</th>
+        <th>Actor 2</th>
+        <th>Director</th>
+        <th>Genre</th>
+        <th>Year</th>
+        <th>Actions</th>
+    </tr>
+    {% for video in videos %}
+    <tr style="background-color:#222;">
+        <td style="padding:10px;">{{ video.MovieTitle }}</td>
+        <td>{{ video.Actor1Name }}</td>
+        <td>
+            {% if video.Actor2Name %}
+                {{ video.Actor2Name }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+        <td>{{ video.DirectorName }}</td>
+        <td>{{ video.MovieGenre }}</td>
+        <td>{{ video.ReleaseYear }}</td>
+        <td>
+            <a href="{% url 'edit_video' video.pk %}" class="btn">Edit</a>
+            <a href="{% url 'delete_video' video.pk %}" class="btn" style="background:#a83232;">Delete</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center; padding:10px;">No videos found.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

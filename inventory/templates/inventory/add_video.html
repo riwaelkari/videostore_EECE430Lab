@@ -1,0 +1,12 @@
+{% extends 'inventory/base.html' %}
+{% block title %}Add Video{% endblock %}
+
+{% block content %}
+<h2>Add New Video</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" style="margin-right:10px;">Save</button>
+    <a href="{% url 'list_videos' %}" class="btn" style="background:#555;">Cancel</a>
+</form>
+{% endblock %}
