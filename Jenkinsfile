@@ -33,7 +33,7 @@ pipeline {
                 bat '''
                 echo === Setting Kubernetes environment ===
                 set MINIKUBE_HOME=C:\\SPB_Data\\.minikube
-                set KUBECONFIG=C:\\SPB_Data\\.minikube\\profiles\\minikube\\config
+                set KUBECONFIG=C:\\Windows\\System32\\config\\systemprofile\\.kube\\config
 
                 echo === Getting Minikube IP ===
                 for /f %%A in ('minikube ip') do set MINIKUBE_IP=%%A
