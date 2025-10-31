@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        // Poll GitHub every 2 minutes for changes
+        // Poll GitHub every 2 minutes for updates
         pollSCM('H/2 * * * *')
     }
 
@@ -10,7 +10,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo "Checking out source code from GitHub..."
+                echo "📦 Checking out source code from GitHub..."
                 git branch: 'master', url: 'https://github.com/riwaelkari/videostore_EECE430Lab.git'
             }
         }
@@ -32,15 +32,19 @@ pipeline {
             steps {
                 bat '''
                 echo === Setting Kubernetes environment ===
-                set KUBECONFIG=C:\\SPB_Data\\.minikube\\profiles\\minikube\\config
                 set MINIKUBE_HOME=C:\\SPB_Data\\.minikube
+                set KUBECONFIG=C:\\SPB_Data\\.minikube\\profiles\\minikube\\config
+
+                echo === Getting Minikube IP ===
+                for /f %%A in ('minikube ip') do set MINIKUBE_IP=%%A
+                echo Detected Minikube IP: %MINIKUBE_IP%
 
                 echo === Applying Kubernetes manifests ===
-                kubectl apply -f deployment.yaml --validate=false
-                kubectl apply -f service.yaml --validate=false
+                kubectl --server=https://%MINIKUBE_IP%:65473 --insecure-skip-tls-verify apply -f deployment.yaml --validate=false
+                kubectl --server=https://%MINIKUBE_IP%:65473 --insecure-skip-tls-verify apply -f service.yaml --validate=false
 
-                echo === Waiting for rollout to complete ===
-                kubectl rollout status deployment/videostore-deployment
+                echo === Waiting for rollout ===
+                kubectl --server=https://%MINIKUBE_IP%:65473 --insecure-skip-tls-verify rollout status deployment/videostore-deployment
                 '''
             }
         }
@@ -48,7 +52,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 bat '''
-                echo === Verifying Minikube deployment ===
+                echo === Verifying deployed resources ===
                 kubectl get pods
                 kubectl get svc
                 '''
