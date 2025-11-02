@@ -28,33 +28,31 @@ pipeline {
             }
         }
 
-    
-
         stage('Deploy to Minikube') {
-              steps {
+            steps {
                 bat '''
                 echo === Setting Kubernetes environment ===
                 set MINIKUBE_HOME=C:\\SPB_Data\\.minikube
                 set KUBECONFIG=C:\\Windows\\System32\\config\\systemprofile\\.kube\\config
-            
+
                 echo === Getting Minikube IP and Port dynamically ===
+                setlocal enabledelayedexpansion
                 for /f "tokens=*" %%A in ('minikube kubectl -- config view ^| findstr server') do set LINE=%%A
-                for /f "tokens=4 delims=:" %%B in ("%%LINE%%") do set MINIKUBE_PORT=%%B
-                set MINIKUBE_PORT=%MINIKUBE_PORT: =%
+                for /f "tokens=4 delims=:" %%B in ("!LINE!") do set MINIKUBE_PORT=%%B
+                set MINIKUBE_PORT=!MINIKUBE_PORT: =!
                 for /F %%C in ('minikube ip') do set MINIKUBE_IP=%%C
-                echo Detected Minikube API: https://127.0.0.1:%MINIKUBE_PORT%
+                echo Detected Minikube API: https://127.0.0.1:!MINIKUBE_PORT!
 
-            
                 echo === Applying Kubernetes manifests ===
-                kubectl --server=https://127.0.0.1:%MINIKUBE_PORT% --insecure-skip-tls-verify apply -f deployment.yaml --validate=false
-                kubectl --server=https://127.0.0.1:%MINIKUBE_PORT% --insecure-skip-tls-verify apply -f service.yaml --validate=false
-            
-                echo === Waiting for rollout ===
-                kubectl --server=https://127.0.0.1:%MINIKUBE_PORT% --insecure-skip-tls-verify rollout status deployment/videostore-deployment
-                '''
-              }
-            }
+                kubectl --server=https://127.0.0.1:!MINIKUBE_PORT! --insecure-skip-tls-verify apply -f deployment.yaml --validate=false
+                kubectl --server=https://127.0.0.1:!MINIKUBE_PORT! --insecure-skip-tls-verify apply -f service.yaml --validate=false
 
+                echo === Waiting for rollout ===
+                kubectl --server=https://127.0.0.1:!MINIKUBE_PORT! --insecure-skip-tls-verify rollout status deployment/videostore-deployment
+                endlocal
+                '''
+            }
+        }
 
         stage('Verify Deployment') {
             steps {
