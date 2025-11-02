@@ -38,10 +38,12 @@ pipeline {
                 set KUBECONFIG=C:\\Windows\\System32\\config\\systemprofile\\.kube\\config
             
                 echo === Getting Minikube IP and Port dynamically ===
-                for /f "tokens=2 delims=:" %%a in ('minikube kubectl -- config view ^| findstr server') do set MINIKUBE_PORT=%%a
-                set MINIKUBE_PORT=%MINIKUBE_PORT:~2%
+                for /f "tokens=2 delims=:" %%a in ('minikube kubectl -- config view ^| findstr server') do set LINE=%%a
+                for /f "tokens=2 delims=:" %%b in ("%LINE%") do set PORTLINE=%%b
+                set MINIKUBE_PORT=%PORTLINE:~0,-1%
                 for /F %%A in ('minikube ip') do set MINIKUBE_IP=%%A
                 echo Detected Minikube API: https://127.0.0.1:%MINIKUBE_PORT%
+
             
                 echo === Applying Kubernetes manifests ===
                 kubectl --server=https://127.0.0.1:%MINIKUBE_PORT% --insecure-skip-tls-verify apply -f deployment.yaml --validate=false
