@@ -38,10 +38,10 @@ pipeline {
                 set KUBECONFIG=C:\\Windows\\System32\\config\\systemprofile\\.kube\\config
             
                 echo === Getting Minikube IP and Port dynamically ===
-                for /f "tokens=2 delims=:" %%a in ('minikube kubectl -- config view ^| findstr server') do set LINE=%%a
-                for /f "tokens=2 delims=:" %%b in ("%LINE%") do set PORTLINE=%%b
-                set MINIKUBE_PORT=%PORTLINE:~0,-1%
-                for /F %%A in ('minikube ip') do set MINIKUBE_IP=%%A
+                for /f "tokens=*" %%A in ('minikube kubectl -- config view ^| findstr server') do set LINE=%%A
+                for /f "tokens=4 delims=:" %%B in ("%%LINE%%") do set MINIKUBE_PORT=%%B
+                set MINIKUBE_PORT=%MINIKUBE_PORT: =%
+                for /F %%C in ('minikube ip') do set MINIKUBE_IP=%%C
                 echo Detected Minikube API: https://127.0.0.1:%MINIKUBE_PORT%
 
             
