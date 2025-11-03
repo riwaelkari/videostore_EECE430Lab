@@ -32,8 +32,8 @@ pipeline {
             steps {
                 bat '''
                 echo === Setting Kubernetes environment ===
-                set MINIKUBE_HOME=C:\\SPB_Data\\.minikube
-                set KUBECONFIG=C:\\Windows\\System32\\config\\systemprofile\\.kube\\config
+                set MINIKUBE_HOME=C:\\Users\\jenkinsadmin\\.minikube
+                set KUBECONFIG=C:\\Users\\jenkinsadmin\\.kube\\config
 
                 echo === Getting Minikube IP and Port dynamically ===
                 setlocal enabledelayedexpansion
@@ -41,14 +41,14 @@ pipeline {
                 for /f "tokens=4 delims=:" %%B in ("!LINE!") do set MINIKUBE_PORT=%%B
                 set MINIKUBE_PORT=!MINIKUBE_PORT: =!
                 for /F %%C in ('minikube ip') do set MINIKUBE_IP=%%C
-                echo Detected Minikube API: https://127.0.0.1:!MINIKUBE_PORT!
+                echo Detected Minikube API: https://!MINIKUBE_IP!:!MINIKUBE_PORT!
 
                 echo === Applying Kubernetes manifests ===
-                kubectl --server=https://127.0.0.1:!MINIKUBE_PORT! --insecure-skip-tls-verify apply -f deployment.yaml --validate=false
-                kubectl --server=https://127.0.0.1:!MINIKUBE_PORT! --insecure-skip-tls-verify apply -f service.yaml --validate=false
+                kubectl --server=https://!MINIKUBE_IP!:!MINIKUBE_PORT! --insecure-skip-tls-verify apply -f deployment.yaml --validate=false
+                kubectl --server=https://!MINIKUBE_IP!:!MINIKUBE_PORT! --insecure-skip-tls-verify apply -f service.yaml --validate=false
 
                 echo === Waiting for rollout ===
-                kubectl --server=https://127.0.0.1:!MINIKUBE_PORT! --insecure-skip-tls-verify rollout status deployment/videostore-deployment
+                kubectl --server=https://!MINIKUBE_IP!:!MINIKUBE_PORT! --insecure-skip-tls-verify rollout status deployment/videostore-deployment
                 endlocal
                 '''
             }
